@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('course_mentors', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_active');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->text('about')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
