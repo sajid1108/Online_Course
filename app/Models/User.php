@@ -52,4 +52,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class, 'user_id');
     }
+
+    public function getActiveSubscription()
+    {
+        return $this->transactions()
+        ->where('is_paid', true)
+        ->where('ended_at', '>=', now())
+        ->first(); // return details of subscription
+    }
+
+    public function hasActiveSubscription()
+    {
+        return $this->transactions()
+        ->where('is_paid', true)
+        ->where('ended_at', '>=', now()) // ensure the subscription is still active
+        ->exists(); // return boolean
+    }
 }
