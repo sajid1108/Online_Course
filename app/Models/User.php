@@ -77,3 +77,4 @@ class User extends Authenticatable implements FilamentUser
         ->exists(); // return boolean
     }
 }
+
