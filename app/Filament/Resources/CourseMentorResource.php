@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CourseMentorResource\Pages;
 use App\Filament\Resources\CourseMentorResource\RelationManagers;
 use App\Models\CourseMentor;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,6 +25,30 @@ class CourseMentorResource extends Resource
         return $form
             ->schema([
                 //
+                Forms\Components\Select::make('course_id')
+                ->relationship('course', 'name')
+                ->searchable()
+                ->preload()
+                ->required(),
+
+                Forms\Components\Select::make('user_id')
+                ->label('Mentor')
+                ->options(function () {
+                    return User::role('mentor')->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->required(),
+
+                Forms\Components\Textarea::make('about')
+                ->required(),
+
+                Forms\Components\Select::make('is_active')
+                ->options([
+                    true => 'Active',
+                    false => 'Banned',
+                ])
+                ->required(),
             ]);
     }
 
