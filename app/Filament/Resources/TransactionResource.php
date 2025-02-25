@@ -12,6 +12,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,6 +24,8 @@ class TransactionResource extends Resource
     protected static ?string $model = Transaction::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Customers';
 
     public static function form(Form $form): Form
     {
@@ -192,12 +195,48 @@ class TransactionResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\ImageColumn::make('student.photo')
+                ->circular()
+                ,
+
+                Tables\Columns\TextColumn::make('student.name')
+                ->searchable(),
+
+                Tables\Columns\TextColumn::make('booking_trx_id')
+                ->searchable(),
+
+                Tables\Columns\TextColumn::make('pricing.name'),
+
+                Tables\Columns\IconColumn::make('is_paid')
+                ->boolean()
+                ->trueColor('success')
+                ->falseColor('danger')
+                ->trueIcon('heroicon-o-check-circle')
+                ->falseIcon('heroicon-o-x-circle')
+                ->label('Terverivikasi'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+
+                Tables\Actions\Action::make('approve')
+                ->label('Approve')
+                ->action(function (Transaction $record) {
+                    $record->is_paid = true;
+                    $record->save();
+
+                    Notification::make()
+                    ->title('Order Approved')
+                    ->success()
+                    ->body('The Order has been successfully approved. ')
+                    ->send();
+                })
+                ->color('success')
+                ->requiresConfirmation()
+                ->visible(fn (Transaction $record) => !$record->is_paid),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
