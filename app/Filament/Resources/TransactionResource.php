@@ -6,8 +6,10 @@ use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Pricing;
 use App\Models\Transaction;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -113,7 +115,70 @@ class TransactionResource extends Resource
                             ->required(),
 
                         ]),
+                    ]),
+
+                    Forms\Components\Wizard\Step::make('Customer Information')
+                    ->schema([
+                        Forms\Components\Select::make('user_id')
+                        ->relationship('student', 'email')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            $user = User::find($state);
+
+                            $name = $user->name;
+                            $email = $user->email;
+
+                            $set('name', $name);
+                            $set('email', $email);
+                        })
+                        ->afterStateHydrated(function (callable $set, $state) {
+                            $userId = $state;
+                            if ($userId) {
+                                $user = User::find($userId);
+                                $name = $user->name;
+                                $email = $user->email;
+                                $set('name', $name);
+                                $set('email', $email);
+                            }
+                        }),
+                        Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->readOnly()
+                        ->maxLength(255),
+
+                        Forms\Components\TextInput::make('email')
+                        ->required()
+                        ->readOnly()
+                        ->maxLength(255),
+                    ]),
+
+
+                Forms\Components\Wizard\Step::make('Payment Information')
+                ->schema([
+
+                    ToggleButtons::make('is_paid')
+                    ->label('Apakah sudah membayar?')
+                    ->boolean()
+                    ->grouped()
+                    ->icons([
+                        true => 'heroicon-o-pencil',
+                        false => 'heroicon-o-clock',
                     ])
+                    ->required(),
+
+                Forms\Components\Select::make('payment_type')
+                ->options([
+                    'Midtrans' => 'Midtrans',
+                    'Manual' => 'Manual'
+                ])
+                ->required(),
+
+                Forms\Components\FileUpload::make('proof')
+                ->image(),
+             ]),
 
                 ])
                 ->columnSpan('full')
