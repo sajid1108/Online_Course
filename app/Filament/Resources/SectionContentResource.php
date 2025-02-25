@@ -26,7 +26,7 @@ class SectionContentResource extends Resource
             ->schema([
                 //
                 Select::make('course_section_id')
-                ->label('Course Section')
+                ->label('Course_Section')
                 ->options(function () {
                     return \App\Models\CourseSection::with('course')
                     ->get()
